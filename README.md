@@ -2,6 +2,9 @@
 
 **AERA Recovery bring-up research + device tree for the OPPO R9 Plusm A / R9PlustmA (`R9PlusA`, MSM8976).**
 
+- Repository: <https://github.com/K3huazhi/android_device_oppo_r9plus-AERA>
+- Research snapshot: <https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.1-research>
+
 > Current verdict: **PARTIALLY FEASIBLE** — the device identity, partition map, boot format, kernel/FDT, display/touch/USB paths, and OPPO certificate are verified and the device tree passes static validation. A complete AOSP 16 build was **not** finished on the 16 GB build host, so no bootable `recovery.img` is included. This is a build-host limitation, not a proven R9 hardware blocker.
 
 ---
