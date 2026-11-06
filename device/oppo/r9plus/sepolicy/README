@@ -1,0 +1,6 @@
+#
+# Minimal SELinux policy placeholder for the AERA R9Plus tree.
+# The initial bring-up kernel command line is permissive, so no device
+# policy is required for Stage 1. Add file_contexts/genfs_contexts only
+# when moving to enforcing.
+#

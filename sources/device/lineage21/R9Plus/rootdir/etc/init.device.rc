@@ -1,0 +1,30 @@
+#
+# Copyright (C) 2025 The LineageOS Project
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+service vendor.device-sh /vendor/bin/init.device.sh
+    user root
+    group root
+    oneshot
+
+on early-init
+    exec_start vendor.device-sh
+    setprop ro.boot.product.hardware.sku ${ro.separate.soft}
+
+    # WiFi NV
+    mount overlay overlay /vendor/firmware/wlan/prima ro lowerdir=/vendor/firmware/wlan/${ro.vendor.wifi.nv}:/vendor/firmware/wlan/prima
+
+    # Miscellaneous variant specific files
+    mount overlay overlay /vendor/etc/sensors ro lowerdir=/vendor/etc/sensor_def/${ro.separate.soft}:/vendor/etc/sensors
+
+service vendor.qkmloader /vendor/bin/qkmloader
+   class core
+   user root
+   group root
+
+on init
+   # vold needs keymaster that needs qkmloader
+   # qkmloader requires qseecomd to load fw
+   start vendor.qkmloader

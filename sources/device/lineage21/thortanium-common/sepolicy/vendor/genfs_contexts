@@ -1,0 +1,36 @@
+# Boot reason
+genfscon proc /sys/kernel/boot_reason               u:object_r:proc_boot_reason:s0
+
+# Camera
+genfscon proc /front_eeprom_info                    u:object_r:proc_oppo_camera:s0
+genfscon proc /rear_eeprom_info                     u:object_r:proc_oppo_camera:s0
+genfscon proc /qcom_flash                           u:object_r:proc_flashlight:s0
+
+# Extcon
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8950@2:qcom,qpnp-smbcharger/extcon/extcon1/cable.1/name u:object_r:sysfs_extcon:s0
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8950@2:qcom,qpnp-smbcharger/extcon/extcon1/cable.0/name u:object_r:sysfs_extcon:s0
+genfscon sysfs /devices/platform/soc/soc:qcom,mdss_wb_panel/extcon/extcon0/cable.0/name             u:object_r:sysfs_extcon:s0
+
+# Fingerprint
+genfscon sysfs /devices/platform/soc/soc:fpc_fpc1020         u:object_r:fingerprint_sysfs:s0
+
+# OPPO specifics
+genfscon proc /devinfo                              u:object_r:proc_oppo_info:s0
+genfscon proc /oppoVersion                          u:object_r:proc_oppo_info:s0
+
+# Power
+genfscon proc /touchpanel                           u:object_r:proc_touchpanel:s0
+genfscon proc /touchkey                             u:object_r:proc_touchpanel:s0
+genfscon sysfs /devices/platform/soc/soc:gpio_keys/disabled_keys u:object_r:sysfs_touchpanel:s0
+
+# Power supply
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8950@2:qcom,qpnp-smbcharger/power_supply/dc u:object_r:sysfs_battery_supply:s0
+
+# ProcFS
+genfscon proc /sys/vm/dirty_writeback_centisecs     u:object_r:proc_dirty:s0
+
+# Rmt
+genfscon debugfs /rmt_storage                       u:object_r:debugfs_rmt:s0
+
+# NV backup
+genfscon sysfs /devices/platform/soc/0.qcom,oembackup_sharedmem/uio/uio1     u:object_r:sysfs_uio_file:s0

@@ -1,0 +1,2 @@
+# Keymaster
+/(vendor|system/vendor)/bin/qkmloader           u:object_r:tee_exec:s0

@@ -1,0 +1,187 @@
+#
+# Copyright (C) 2021 The LineageOS Project
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+COMMON_PATH := device/oppo/thortanium-common
+
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 :=
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := cortex-a53
+
+TARGET_2ND_ARCH := arm
+TARGET_2ND_ARCH_VARIANT := armv8-a
+TARGET_2ND_CPU_ABI := armeabi-v7a
+TARGET_2ND_CPU_ABI2 := armeabi
+TARGET_2ND_CPU_VARIANT := cortex-a53
+
+# Audio
+AUDIO_FEATURE_ENABLED_EXTENDED_COMPRESS_FORMAT := true
+AUDIO_FEATURE_ENABLED_PROXY_DEVICE := true
+AUDIO_FEATURE_ENABLED_SSR := true
+AUDIO_USE_LL_AS_PRIMARY_OUTPUT := true
+BOARD_SUPPORTS_SOUND_TRIGGER := true
+BOARD_USES_ALSA_AUDIO := true
+TARGET_USES_QCOM_MM_AUDIO := true
+
+# ANT+
+BOARD_ANT_WIRELESS_DEVICE := "qualcomm-hidl"
+
+# Bootloader
+TARGET_NO_BOOTLOADER := true
+
+# Bionic
+TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
+    /vendor/bin/mm-qcamera-daemon=23
+
+# Bluetooth
+BOARD_HAVE_BLUETOOTH_QCOM := true
+
+# Camera
+BOARD_QTI_CAMERA_32BIT_ONLY := true
+TARGET_SUPPORT_HAL1 := false
+
+# Display
+MAX_VIRTUAL_DISPLAY_DIMENSION := 4096
+TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS := true
+TARGET_USES_ION := true
+TARGET_USES_GRALLOC1 := true
+TARGET_USES_HWC2 := true
+
+# Filesystem
+TARGET_FS_CONFIG_GEN := $(COMMON_PATH)/config.fs
+
+# FM
+ifeq ($(BOARD_HAVE_QCOM_FM),true)
+TARGET_QCOM_NO_FM_FIRMWARE := true
+endif
+
+# GPS
+BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := default
+LOC_HIDL_VERSION := 4.0
+
+# HIDL
+DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := \
+    $(COMMON_PATH)/framework_compatibility_matrix.xml \
+    hardware/qcom-caf/common/vendor_framework_compatibility_matrix.xml \
+    hardware/qcom-caf/common/vendor_framework_compatibility_matrix_legacy.xml \
+    vendor/lineage/config/device_framework_matrix.xml
+
+DEVICE_MATRIX_FILE += hardware/qcom-caf/common/compatibility_matrix.xml
+DEVICE_MANIFEST_FILE += $(COMMON_PATH)/manifest.xml
+
+ifeq ($(BOARD_HAVE_QCOM_FM),true)
+DEVICE_MANIFEST_FILE += $(COMMON_PATH)/manifest_fm.xml
+endif
+
+# Init
+TARGET_INIT_VENDOR_LIB ?= //$(COMMON_PATH):init_oppo_thortanium
+TARGET_RECOVERY_DEVICE_MODULES ?= init_oppo_thortanium
+
+# Kernel
+BOARD_KERNEL_BASE := 0x80000000
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 androidboot.bootdevice=7824900.sdhci loop.max_part=7
+BOARD_KERNEL_CMDLINE += androidboot.init_fatal_reboot_target=recovery
+BOARD_KERNEL_CMDLINE += androidboot.boot_devices=soc/7824900.sdhci
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_TAGS_OFFSET := 0x00000100
+BOARD_RAMDISK_OFFSET := 0x1000000
+BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
+BOARD_MKBOOTIMG_ARGS := --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
+BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
+TARGET_KERNEL_SOURCE := kernel/oppo/msm8937
+TARGET_KERNEL_VERSION := 4.9
+
+# Kernel - Verity
+TARGET_NEEDS_OPPO_VERITY_FAKESIGN ?= true
+ifeq ($(TARGET_NEEDS_OPPO_VERITY_FAKESIGN), true)
+BOARD_CUSTOM_BOOTIMG := true
+BOARD_CUSTOM_BOOTIMG_MK := $(COMMON_PATH)/boot/mkbootimg.mk
+endif
+
+# Partitions
+BOARD_USES_METADATA_PARTITION := true
+
+BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 67108864
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2684354560
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
+
+ifeq ($(TARGET_VENDOR_PARTITION),)
+TARGET_COPY_OUT_VENDOR := system/vendor
+else
+BOARD_VENDORIMAGE_PARTITION_SIZE := 268435456
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := squashfs
+BOARD_VENDORIMAGE_EXTFS_INODE_COUNT := 4096
+BOARD_VENDORIMAGE_JOURNAL_SIZE := 0
+BOARD_VENDORIMAGE_SQUASHFS_COMPRESSOR := lz4
+TARGET_COPY_OUT_VENDOR := vendor
+endif
+
+# Power
+TARGET_TAP_TO_WAKE_NODE := "/proc/touchpanel/double_tap_enable"
+TARGET_USES_INTERACTION_BOOST := true
+
+# Platform
+BOARD_USES_QCOM_HARDWARE := true
+TARGET_ENFORCES_QSSI := true
+
+# Properties
+TARGET_ODM_PROP += $(COMMON_PATH)/odm.prop
+TARGET_SYSTEM_PROP += $(COMMON_PATH)/system.prop
+TARGET_SYSTEM_EXT_PROP += $(COMMON_PATH)/system_ext.prop
+TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor.prop
+
+# Recovery
+TARGET_RECOVERY_UPDATER_LIBS := librecovery_updater_oppo
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+TARGET_USES_MKE2FS := true
+
+# Releasetools
+TARGET_RELEASETOOLS_EXTENSIONS := $(COMMON_PATH)
+
+# RIL
+ENABLE_VENDOR_RIL_SERVICE := true
+
+# SEPolicy
+include device/qcom/sepolicy-legacy-um/SEPolicy.mk
+BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
+ifneq ($(TARGET_VENDOR_PARTITION),)
+BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/$(TARGET_VENDOR_PARTITION)_vendor
+endif
+
+# Treble
+BOARD_VNDK_VERSION := current
+PRODUCT_FULL_TREBLE_OVERRIDE := true
+
+# Wi-Fi
+BOARD_HAS_QCOM_WLAN := true
+BOARD_HOSTAPD_DRIVER := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_qcwcn
+BOARD_WLAN_DEVICE := qcwcn
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_qcwcn
+PRODUCT_VENDOR_MOVE_ENABLED := true
+TARGET_HAS_BROKEN_WLAN_SET_INTERFACE := true
+TARGET_USES_WCNSS_MAC_ADDR_REV := true
+TARGET_USES_QCOM_WCNSS_QMI := true
+TARGET_WCNSS_QMI_INCLUDE_DIR := $(COMMON_PATH)/wifi/include
+WIFI_DRIVER_FW_PATH_AP := "ap"
+WIFI_DRIVER_FW_PATH_STA := "sta"
+WIFI_HIDL_FEATURE_DISABLE_AP_MAC_RANDOMIZATION := true
+WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+
+# Inherit the proprietary files
+include vendor/oppo/thortanium-common/BoardConfigVendor.mk

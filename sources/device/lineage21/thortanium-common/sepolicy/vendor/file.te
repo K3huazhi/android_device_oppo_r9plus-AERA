@@ -1,0 +1,12 @@
+type camera_socket, file_type, data_file_type;
+type debugfs_rmt, debugfs_type, fs_type;
+type fingerprint_sysfs, fs_type, sysfs_type;
+type nvbackup_block_device, dev_type;
+type nv_data_file, file_type, data_file_type, core_data_file_type;
+type rild_file, file_type, vendor_file_type;
+type proc_boot_reason, fs_type, proc_type;
+type proc_flashlight, fs_type, proc_type;
+type proc_oppo_camera, fs_type, proc_type;
+type proc_oppo_info, fs_type, proc_type;
+type proc_touchpanel, fs_type, proc_type;
+type sysfs_touchpanel, fs_type, sysfs_type;

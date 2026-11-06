@@ -1,0 +1,23 @@
+typeattribute vendor_init data_between_core_and_vendor_violators;
+
+set_prop(vendor_init, camera_prop)
+get_prop(vendor_init, vendor_wifi_nv_prop)
+get_prop(vendor_init, system_oplus_project_prop)
+
+allow vendor_init {
+  bluetooth_data_file
+  camera_data_file
+  media_rw_data_file
+  nfc_data_file
+  nv_data_file
+  system_data_file
+  wifi_data_file
+  wpa_socket
+}:dir { create search getattr open read setattr ioctl write add_name remove_name rmdir relabelfrom };
+
+allow vendor_init proc_touchpanel:file write;
+
+allow vendor_init {
+  proc_dirty
+  proc_dirty_ratio
+}:file w_file_perms;

@@ -1,0 +1,18 @@
+# Build outputs and large local artifacts
+out/
+dist/
+*.img
+*.zip
+*.tar
+*.tar.gz
+*.tar.xz
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

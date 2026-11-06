@@ -1,0 +1,24 @@
+//
+// Copyright (C) 2025 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_library_shared {
+    name: "libril-qcril-oppo",
+    proprietary: true,
+    defaults: ["hidl_defaults"],
+    srcs: [
+        "qcril_functions.cpp",
+        "qcril_shim.cpp",
+    ],
+    cflags: [
+        "-Werror",
+        "-Wextra",
+        "-Wall",
+    ],
+    shared_libs: [
+        "libbase",
+        "libdl",
+    ],
+}

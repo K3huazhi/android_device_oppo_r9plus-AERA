@@ -1,0 +1,46 @@
+AERA Recovery — OPPO R9 Plusm A (r9plus) port
+=============================================
+
+This repository contains original research, documentation, and device
+configuration produced for the AERA Recovery project.
+
+Third-party components and their origins
+----------------------------------------
+
+AERA Recovery
+  https://github.com/AERA-Recovery
+  AERA is built on AOSP Recovery, TWRP, OrangeFox, and LineageOS work.
+  See the upstream repositories and their NOTICE/COPYING files.
+
+TeamWin Recovery Project (TWRP)
+  https://github.com/TeamWin
+  The R9Plus recovery.fstab / twrp.flags baseline is derived from the
+  TipzTeam recovery_device_oppo_thortanium tree:
+  https://codeberg.org/TipzTeam/recovery_device_oppo_thortanium
+
+LineageOS
+  https://github.com/LineageOS
+  The 4.9.337 recovery kernel, FDT, and OPPO recovery certificate were
+  extracted from the public LineageOS 22.1 R9Plus release:
+  https://github.com/BlueyfishReleases/R9Plus
+
+CyanogenMod / wuxianlin R9Plus device tree
+  https://github.com/wuxianlin/android_device_oppo_r9plus
+  Used for codename verification, partition table, keylayout, and
+  CM14.1 baseline evidence.
+
+Linux kernel
+  The prebuilt kernel is GPL-2.0. Its source is:
+  https://github.com/blueyfish/android_kernel_oppo_msm8937
+  branch lineage-22.1.
+
+OPPO boot certificate
+  The 1,280-byte DER blob is extracted from the public LineageOS R9Plus
+  recovery image and is included only to reproduce the boot image layout
+  required by this device's aboot.
+
+No OPPO proprietary firmware or full ROM is redistributed here.
+
+The original documentation and device-tree configuration in this repository
+are released under GPL-3.0-or-later. Upstream files retain their original
+licenses and copyright notices.

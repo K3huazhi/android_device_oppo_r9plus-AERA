@@ -1,0 +1,26 @@
+#
+# AERA recovery init for OPPO R9 Plusm A (r9plus)
+#
+# The 4.9 kernel exposes the eMMC as 7824900.sdhci. Android's bootloader
+# passes androidboot.bootdevice=7824900.sdhci. Create the stable
+# /dev/block/bootdevice alias used by every partition entry.
+#
+
+on early-init
+    setprop sys.usb.configfs 1
+    setprop sys.usb.controller msm_hsusb
+
+on init
+    # Panel backlight is the qcom MDSS LED, not panel0-backlight.
+    write /sys/class/leds/lcd-backlight/brightness 127
+    write /sys/class/power_supply/usb/otg_switch 1
+
+on fs
+    wait /dev/block/platform/soc/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+
+on boot
+    # Keep the eight-core SoC from thermal-throttling during long ZIP
+    # verification, but do not offline cores (AERA's UI is multithreaded).
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor conservative
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor conservative

@@ -1,0 +1,20 @@
+on init
+    # LCD backlight
+    chown system system /sys/class/leds/lcd-backlight/max_brightness
+
+    # LM3697 LCD backlight
+    chown system system /sys/class/backlight/lm3697/brightness
+    chown system system /sys/class/backlight/lm3697/max_brightness
+
+    # White light
+    chown system system /sys/class/leds/white/brightness
+    chown system system /sys/class/leds/white/device/blink
+    chown system system /sys/class/leds/white/device/grpfreq
+    chown system system /sys/class/leds/white/device/grppwm
+
+service vendor.light-hal-2-0 /vendor/bin/hw/android.hardware.light@2.0-service.oppo_thortanium
+    interface android.hardware.light@2.0::ILight default
+    class hal
+    user system
+    group system
+    shutdown critical

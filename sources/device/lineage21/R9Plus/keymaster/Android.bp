@@ -1,0 +1,21 @@
+//
+// Copyright (C) 2026 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_binary {
+    name: "qkmloader",
+    srcs: ["keymaster_qcom.cpp"],
+    vendor: true,
+    cflags: [
+        "-fvisibility=hidden",
+        "-Wno-error",
+        "-Wall",
+    ],
+    shared_libs: [
+        "libbase",
+        "libdl",
+        "liblog",
+    ],
+}

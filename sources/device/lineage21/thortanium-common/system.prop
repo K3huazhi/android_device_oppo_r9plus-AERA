@@ -1,0 +1,20 @@
+# Fwk detect
+ro.vendor.qti.va_aosp.support=1
+
+# IMS
+persist.dbg.volte_avail_ovr=1
+persist.dbg.vt_avail_ovr=1
+persist.dbg.wfc_avail_ovr=1
+
+# Memory optimizations
+ro.vendor.qti.sys.fw.bservice_enable=true
+
+# Network manager daemon
+persist.data.netmgrd.qos.enable=true
+
+# Radio
+DEVICE_PROVISIONED=1
+ril.subscription.types=NV,RUIM
+
+# Time Services
+persist.timed.enable=true
