@@ -10,9 +10,11 @@
 - [x] 现有 TWRP 使用痕迹已确认；
 - [x] LineageOS 22.1 recovery 基线已取得；
 - [x] AERA 设备树已建立；
-- [ ] `recovery.img` 构建完成；
-- [ ] 镜像 header / ramdisk / 尾部证书静态校验；
+- [x] `recovery.img` 构建完成（45,681,920 B，SHA-256 `3d9ddd...18df45`）；
+- [x] 镜像 header v0 / page 2048 / ramdisk gzip / 尾部 1,280 B OPPO 证书静态校验；
 - [ ] 备份原厂 boot / recovery（**REQUIRES USER CONFIRMATION**）。
+
+镜像：`dist/recovery-AERA-R1.0-r9plus.img`，详见 [`conclusions/build-success.md`](../conclusions/build-success.md)。
 
 ### 备份（在 TWRP 中执行，需用户操作）
 
