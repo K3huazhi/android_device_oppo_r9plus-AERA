@@ -13,7 +13,7 @@
 | R7 | FDE 无法解密 | 高 | 中 | AERA 16 主要面向 FBE；CM14.1 是 FDE | 首版关闭 crypto；Stage 7 单独移植/验证 |
 | R8 | `reserve2` 被误格式化 | 中 | 中 | Lineage 22.1 用作 metadata；CM14.1 不用 | 首版不自动格式化；UI 不默认勾选 |
 | R9 | system 挂载失败 | 低 | 高 | CM14.1 system 是 ext4，不是 squashfs | fstab 用 ext4；不要套 Lineage 22.1 的 squashfs |
-| R10 | 构建环境 RAM 不足 | 中 | 中 | 16 GB 主机；AOSP 16 需要较大内存 | 12 GB WSL + 32 GB swap；`-j4`/`-j6` |
+| R10 | 构建环境 RAM 不足 | 已缓解 | 低 | 16 GB 主机；AOSP 16 需要较大内存 | 12 GB WSL + 64 GB **NVMe** swap + 8 GB zram；`-j4`；已成功产出镜像 |
 | R11 | 源码同步失败/被墙 | 中 | 中 | GitHub 直连不稳定；AOSP 镜像可用 | ghfast 代理 + Tsinghua AOSP 镜像；断点重试 |
 | R12 | 镜像写入错误分区 | 低 | 致命 | 用户误操作 | 只允许 `fastboot flash recovery`；明确分区表；禁止 `erase`/GPT |
 | R13 | 设备变砖/无法回退 | 低-中 | 致命 | 老设备、无 EDL 验证 | 备份 boot/recovery；确认 TWRP/EDL；先临时启动 |
