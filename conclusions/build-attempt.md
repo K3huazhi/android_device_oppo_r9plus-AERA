@@ -115,3 +115,10 @@ This removed the `dex2oat` dependency panic for `apache-xml`, but did not solve 
 6. Verify with `tools/static_check.py` and `tools/parse_bootimg.py`.
 
 No device write has been performed.
+
+---
+
+## Superseded by successful build
+
+The build was completed on 2026-11-07 with the WSL VHDX and 64 GB swap on C: NVMe. See [build-success.md](build-success.md). The earlier '64 GB RAM host' recommendation was a conservative minimum; the actual successful path used 12 GB WSL RAM plus NVMe swap.
+
