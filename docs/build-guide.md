@@ -10,13 +10,44 @@
 |---|---|
 | Host | Windows 11 26300 |
 | WSL | 2.7.14，Ubuntu 24.04.3 |
-| RAM | 15.8 GB（WSL 建议限制到 12 GB + swap） |
+| RAM | 15.8 GB（WSL 限制 12 GB；64 GB NVMe swap；8 GB zram） |
 | CPU | Xeon E5-2673 v3，12C/24T |
-| 磁盘 | A: 剩余约 227 GB；WSL VHDX 放在 A: |
+| 磁盘 | **C: NVMe 1 TB**；WSL VHDX 与 swap 都在 C: |
 | Python | 3.12 |
 | Git | 2.43 |
 
-> 16 GB RAM 对 AOSP 16 偏紧。构建时用 `-j4`/`-j6`，并配置 32 GB swap；不要用 `-j24`。
+> 16 GB RAM 对 AOSP 16 偏紧。最终成功配置：12 GB WSL + 64 GB **NVMe** swap + 8 GB zram，`-j4`，Soong 峰值 swap 约 27 GiB。不要用 HDD 上的 swap，也不要用 `-j24`。
+
+### 1.1 关键：把 WSL 与 swap 放到 NVMe
+
+这台主机只有 16 GB RAM；成功构建的关键不是“加大 swap”，而是 **swap 必须在 NVMe 上**。最初 WSL VHDX 在 A: 机械盘，swap 也在 HDD，Soong 阶段会严重抖动。
+
+```ini
+# C:\Users\<user>\.wslconfig
+[wsl2]
+memory=12GB
+processors=12
+swap=64GB
+swapFile=C:\\wsl\\swap.vhdx
+```
+
+迁移已有发行版（先用 `wsl --shutdown`）：
+
+```powershell
+wsl --manage AERA-BUILD --move C:\wsl\AERA-BUILD
+```
+
+启用 zram（WSL 内）：
+
+```bash
+apt-get install -y kmod
+modprobe zram num_devices=1
+zramctl /dev/zram0 --size 8G
+mkswap /dev/zram0
+swapon -p 100 /dev/zram0
+```
+
+> zram 优先级高于磁盘 swap；内存极紧时它可能被回收，此时 64 GB NVMe swap 仍是兜底。
 
 ## 2. 网络 / 镜像
 
@@ -175,15 +206,64 @@ ls -l out/target/product/r9plus/recovery.img
 - [ ] 尾部 1,280 字节证书存在；
 - [ ] 总大小 ≤ 64 MiB。
 
-## 11. 当前状态与实际结果
+## 11. 实际构建结果
 
-- AOSP 16 源码：已同步（BFSU 镜像 + GitHub 代理补 AERA 项目）；
+- AOSP 16 源码：完整树（BFSU 镜像 + GitHub 代理补 AERA 项目）；
 - `lunch twrp_r9plus-bp2a-eng`：通过；
-- 全量 Soong 分析：在本机 13.6 GB WSL / 32 GB swap 上超过 20 分钟未完成，随后因内存压力终止；
-- 裁剪 AOSP 模块：触发多处 `aconfig_declarations` panic 和 Connectivity/cronet 依赖环，**不可作为正式构建方式**；
-- `recovery.img`：**未生成**；
+- Soong 全量分析：约 50–60 分钟，峰值 swap 约 27 GiB，未 OOM；
+- Kati / ninja：完成；
+- AERA 打包脚本：`Finished building AERA R1.0`；
+- `recovery.img`：**45,681,920 B**，已追加 OPPO 1,280 B 证书；
 - 设备写入：**未执行**。
 
-完整错误记录见 [`conclusions/build-attempt.md`](../conclusions/build-attempt.md)。
+镜像 SHA-256：
 
-**下一次构建必须在 ≥64 GB RAM 的 Linux 主机上进行，并保留完整 AOSP 树。** 不要用本机裁剪过的 `/root/aosp` 作为最终构建树；请重新 `repo sync` 或恢复 `/root/pruned*`。
+```text
+3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45
+```
+
+完整记录见 [`conclusions/build-success.md`](../conclusions/build-success.md)。
+
+## 12. 需要的构建系统修补
+
+AERA 的 `build/soong` fork 不注册上游 clang `Android.bp` 的 `llvm_prebuilt_library_*` 类型。这里不是改设备树，而是补构建系统：
+
+```bash
+cp tools/build-patches/prebuilts-clang-Android.bp \
+   prebuilts/clang/host/linux-x86/Android.bp
+cp tools/build-patches/system-extras-fec-Android.bp \
+   system/extras/verity/fec/Android.bp
+```
+
+修补内容：
+
+- `libc++` / `libc++_static` / `libc++abi` / `libc++demangle`；
+- `libclang_rt.ubsan_minimal` / `libclang_rt.builtins` / `builtins-exported`；
+- `libunwind` / `libunwind-exported`；
+- `libc++_static_noexcept` / `demangle_noexcept` / `abi_noexcept`；
+- `recovery_available`、`ramdisk_available`、`apex_available`（含 `com.android.runtime`）；
+- `libclang_rt.builtins` 的 `no_libcrt: true`；
+- `libc++` 与 noexcept 变体导出 `include/c++/v1`；
+- `fec` 只构建 64 位，避免 32 位 sanitizer 链接。
+
+打包时若出现：
+
+```text
+could not make way for new symlink: root/vendor
+cannot delete non-empty directory: root/vendor
+```
+
+把 `out/target/product/r9plus/root/vendor` 从 `/system/vendor` 符号链接改为真实目录，保留 `recovery/root/vendor` 的 vintf；然后直接续跑：
+
+```bash
+rm -f out/target/product/r9plus/root/vendor
+mkdir -p out/target/product/r9plus/root/vendor
+prebuilts/build-tools/linux-x86/bin/ninja \
+  -f out/combined-twrp_r9plus.ninja recoveryimage -j4
+```
+
+这样可以避免重新执行 50 分钟的 Soong 分析。
+
+## 13. 复现提示
+
+如果重新 `repo sync`，必须保留完整 AOSP 树；本项目的成功构建依赖完整模块图，裁剪会触发 `aconfig_declarations` 缺失和 Connectivity/cronet 依赖环。
