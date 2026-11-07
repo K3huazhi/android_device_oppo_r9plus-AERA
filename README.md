@@ -15,7 +15,7 @@
 android_device_oppo_r9plus-AERA
 ```
 
-本仓库当前包含研究证据、设备树、预编译内核基线、镜像构建脚本与 bring-up 计划。
+本仓库当前包含研究证据、设备树、预编译内核基线、**已构建的 recovery.img**、构建记录与 bring-up 计划。
 
 ---
 
