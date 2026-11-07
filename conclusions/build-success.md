@@ -1,6 +1,6 @@
 # Build success — AERA R1.0 for OPPO R9 Plusm A
 
-> 状态：**recovery.img 已生成并完成静态校验；设备启动未执行。**
+> 状态：**recovery.img 已生成并完成静态校验；实机刷入后卡第一屏，未启动。项目已放弃。**
 > 镜像：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/download/v0.2-build/recovery-AERA-R1.0-r9plus.img>  
 > SHA-256：`3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45`  
 > 大小：45,681,920 B（43.56 MiB，< 64 MiB 分区）
@@ -107,14 +107,22 @@ AERA 的 `build/soong` fork 不注册上游 clang `Android.bp` 使用的 `llvm_p
 
 这些修补文件在 [`tools/build-patches/`](../tools/build-patches/)。
 
-## 5. 未验证项
+## 5. 运行时结果（已实测，失败）
 
-- **没有刷入设备**，没有执行 `fastboot flash` / `fastboot boot` / `adb reboot`；
-- 没有验证 OPPO aboot 是否接受该证书；
-- 没有验证 AERA 16 用户空间在 4.9 内核上的实际启动；
-- 没有验证显示、触摸、ADB、分区挂载、刷写、sideload、FDE。
+镜像已由用户刷入 `recovery` 分区。重启 recovery 后：
 
-因此构建层面已完成；**运行时仍可能失败**。按项目判定标准，构建与静态校验已满足 FEASIBLE 的构建条件，但设备启动证据仍缺失。
+- 设备**卡在第一屏**，未进入 AERA UI；
+- 主机侧 `adb devices` / `fastboot devices` 均无设备；
+- 未能抓取 `dmesg`、`logcat` 或 pstore；
+- 根因未定位；项目所有者已放弃。
+
+因此：
+
+- 本文档只证明**构建与静态校验成功**；
+- **不证明镜像可启动**；
+- 不要把该镜像作为可刷写镜像分发。
+
+详见 [`runtime-result.md`](runtime-result.md)。
 
 ## 6. 产物
 
