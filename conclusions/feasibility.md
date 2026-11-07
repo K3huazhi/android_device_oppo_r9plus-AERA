@@ -1,10 +1,10 @@
 # Feasibility — provisional assessment
 
-> 状态：**AERA R1.0 `recovery.img` 已构建并通过静态校验；设备启动尚未执行。**
+> 状态：**AERA R1.0 `recovery.img` 已构建并通过静态校验；实机刷入后卡第一屏，无 ADB/fastboot；项目已放弃。**
 
 ## 1. 结论
 
-**FEASIBLE（构建与静态校验层面）**
+**PARTIALLY FEASIBLE（构建成功，运行时失败；项目已放弃）**
 
 设备树、内核、FDT、OPPO 证书、分区/fstab/显示/触摸/ADB 路径均已建立；AOSP 16 全量构建已完成，产出：
 
@@ -16,7 +16,9 @@ sha256 3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45
 
 构建使用 12 GB WSL + 64 GB NVMe swap + 8 GB zram，Soong 峰值 swap 约 27 GiB，未 OOM。镜像 header v0 / page 2048、内核 SHA-256 与预编译 `Image.gz-dtb` 一致、ramdisk gzip 可解、尾部 1,280 B OPPO 证书存在，设备树静态检查 38/38 PASS。
 
-**未完成的是设备运行时验证**：没有刷入、没有启动、没有验证显示/触摸/ADB/分区/FDE。因此这不是“已验证可启动”的 FEASIBLE，而是“构建和静态证据完整”的 FEASIBLE。
+**设备验证结果：失败。** 用户刷入 `recovery` 后重启，设备卡在第一屏，未进入 AERA UI；主机侧 `adb devices` 与 `fastboot devices` 均无设备，未能抓取日志。项目所有者已放弃继续 bring-up。
+
+因此最终不是“可启动的 FEASIBLE”，而是 **构建成功、运行时失败** 的 PARTIALLY FEASIBLE。失败记录见 [`runtime-result.md`](runtime-result.md)。
 
 理由：
 
@@ -197,7 +199,7 @@ sepolicy/
 
 ## 3. 最终判定
 
-当前：**FEASIBLE（构建/静态）**。
+当前：**PARTIALLY FEASIBLE（构建成功，运行时失败；项目已放弃）**。
 
 已满足：
 
@@ -209,10 +211,6 @@ sepolicy/
 - 总大小 45,681,920 B < 67,108,864 B；
 - 设备树静态检查 38/38 PASS。
 
-**没有满足**：设备启动到 AERA UI，显示/触摸/ADB/分区识别正常。因此不能称为“已验证可启动”。
+**未满足**：设备刷入后卡第一屏，未进入 AERA UI；`adb` / `fastboot` 均不可见，未取得日志。根因未定位。
 
-设备验证后：
-
-- 若启动且核心功能正常 → **FEASIBLE（已验证）**；
-- 若镜像可构建但显示/触摸/ADB/分区之一不可用，或 FDE 不可用 → **PARTIALLY FEASIBLE**；
-- 若 4.9 内核无法启动 AERA 16 userspace，且无法通过最小内核修改解决；或 OPPO aboot 拒绝该镜像且无回退 → **BLOCKED**。
+项目所有者已放弃继续 bring-up；本仓库保留构建与失败记录，供后续研究者参考。**该镜像不应作为可刷写镜像分发。**
