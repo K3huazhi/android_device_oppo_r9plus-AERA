@@ -1,9 +1,22 @@
 # Next steps
 
-## 立即（构建阶段）
+> 构建阶段已完成：`recovery.img` 已生成并通过静态校验，见 [`build-success.md`](build-success.md)。下面是设备验证步骤；后面的“重新构建”仅作为复现参考。
 
-1. **换到 ≥64 GB RAM 的 Linux 主机**  
-   本机 16 GB RAM / 13.6 GB WSL 无法完成 AOSP 16 全量 Soong 分析（见 `conclusions/build-attempt.md`）。不要在裁剪过的树上继续硬试；裁剪会触发 aconfig/依赖环错误。
+## 立即（设备验证，需明确授权）
+
+1. **先备份并可回退**：确认 `boot`、`recovery`、`system`、`userdata` 的现状；准备 TWRP/Lineage recovery 回退镜像。
+2. **只验证 recovery 分区**：不要动 `boot`/`system`/`userdata`/GPT。
+3. **建议顺序**：
+   - `fastboot boot` 临时启动（若 OPPO aboot 支持）；
+   - 或只 `fastboot flash recovery`，失败时立即回刷原 recovery；
+   - 记录串口/UART 或 `last_kmsg`/`pstore`（若可用）。
+4. **Stage 1 目标**：AERA UI 点亮、触摸、ADB、分区识别。
+5. 任何写入前再次确认；不要在未备份时格式化或解锁。
+
+## 如需重新构建（复现）
+
+1. **使用 NVMe 上的 WSL + 64 GB swap**  
+   本机 16 GB RAM 曾无法在 HDD swap 上完成 Soong；最终用 12 GB WSL + 64 GB NVMe swap + 8 GB zram 成功。见 `conclusions/build-success.md`。不要在裁剪过的树上继续硬试；裁剪会触发 aconfig/依赖环错误。
 
 2. **重新同步完整 AERA manifest**  
    ```bash
