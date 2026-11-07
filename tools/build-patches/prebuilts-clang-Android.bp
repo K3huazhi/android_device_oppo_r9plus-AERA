@@ -1,0 +1,306 @@
+// Minimal AOSP clang prebuilt module set for AERA.
+//
+// AERA's build/soong fork does not register the llvm_prebuilt_library_*
+// module types used by the upstream clang Android.bp.  Recovery only needs
+// libc++, the unwinder, builtins and the minimal UBSan runtime, so this file
+// exposes those files through the standard cc_prebuilt_* types.
+
+cc_prebuilt_library_shared {
+    name: "libc++",
+    host_supported: true,
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    strip: {
+        none: true,
+    },
+    check_elf_files: false,
+    export_include_dirs: ["clang-r547379/include/c++/v1"],
+    target: {
+        android_arm64: {
+            srcs: ["clang-r547379/android_libc++/platform/aarch64/lib/libc++.so"],
+        },
+        android_arm: {
+            srcs: ["clang-r547379/android_libc++/platform/arm/lib/libc++.so"],
+        },
+        android_x86_64: {
+            srcs: ["clang-r547379/android_libc++/platform/x86_64/lib/libc++.so"],
+        },
+        android_x86: {
+            srcs: ["clang-r547379/android_libc++/platform/i386/lib/libc++.so"],
+        },
+        linux_glibc: {
+            srcs: ["clang-r547379/lib/libc++.so"],
+        },
+        linux_musl: {
+            srcs: ["clang-r547379/musl/lib/x86_64-unknown-linux-musl/libc++.so"],
+        },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++_static",
+    host_supported: true,
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    export_include_dirs: ["clang-r547379/include/c++/v1"],
+    target: {
+        android_arm64: {
+            srcs: ["clang-r547379/android_libc++/platform/aarch64/lib/libc++_static.a"],
+        },
+        android_arm: {
+            srcs: ["clang-r547379/android_libc++/platform/arm/lib/libc++_static.a"],
+        },
+        android_x86_64: {
+            srcs: ["clang-r547379/android_libc++/platform/x86_64/lib/libc++_static.a"],
+        },
+        android_x86: {
+            srcs: ["clang-r547379/android_libc++/platform/i386/lib/libc++_static.a"],
+        },
+        linux_glibc: {
+            srcs: ["clang-r547379/lib/x86_64-unknown-linux-gnu/libc++.a"],
+        },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++abi_static",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    target: {
+        android_arm64: {
+            srcs: ["clang-r547379/android_libc++/platform/aarch64/lib/libc++abi.a"],
+        },
+        android_arm: {
+            srcs: ["clang-r547379/android_libc++/platform/arm/lib/libc++abi.a"],
+        },
+        android_x86_64: {
+            srcs: ["clang-r547379/android_libc++/platform/x86_64/lib/libc++abi.a"],
+        },
+        android_x86: {
+            srcs: ["clang-r547379/android_libc++/platform/i386/lib/libc++abi.a"],
+        },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++demangle",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    target: {
+        android_arm64: {
+            srcs: ["clang-r547379/android_libc++/platform/aarch64/lib/libc++demangle.a"],
+        },
+        android_arm: {
+            srcs: ["clang-r547379/android_libc++/platform/arm/lib/libc++demangle.a"],
+        },
+        android_x86_64: {
+            srcs: ["clang-r547379/android_libc++/platform/x86_64/lib/libc++demangle.a"],
+        },
+        android_x86: {
+            srcs: ["clang-r547379/android_libc++/platform/i386/lib/libc++demangle.a"],
+        },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libclang_rt.ubsan_minimal",
+    host_supported: true,
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    system_shared_libs: [],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.ubsan_minimal-aarch64-android.a"] },
+        android_arm: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.ubsan_minimal-arm-android.a"] },
+        android_x86_64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.ubsan_minimal-x86_64-android.a"] },
+        android_x86: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.ubsan_minimal-i686-android.a"] },
+        linux_glibc: { srcs: ["clang-r547379/lib/clang/20/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libclang_rt.builtins",
+    host_supported: true,
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    whole_static_libs: [],
+    static_libs: [],
+    shared_libs: [],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-aarch64-android.a"] },
+        android_arm: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-arm-android.a"] },
+        android_x86_64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-x86_64-android.a"] },
+        android_x86: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-i686-android.a"] },
+        linux_glibc: { srcs: ["clang-r547379/lib/clang/20/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libclang_rt.builtins-exported",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    whole_static_libs: [],
+    static_libs: [],
+    shared_libs: [],
+    target: {
+        android_arm: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-arm-android-exported.a"] },
+        android_x86: { srcs: ["clang-r547379/lib/clang/20/lib/linux/libclang_rt.builtins-i686-android-exported.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libunwind",
+    host_supported: true,
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/aarch64/libunwind.a"] },
+        android_arm: { srcs: ["clang-r547379/lib/clang/20/lib/linux/arm/libunwind.a"] },
+        android_x86_64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/x86_64/libunwind.a"] },
+        linux_glibc: { srcs: ["clang-r547379/lib/x86_64-unknown-linux-gnu/libunwind.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libunwind-exported",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "//apex_available:anyapex"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    visibility: ["//visibility:public"],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/aarch64/libunwind-exported.a"] },
+        android_arm: { srcs: ["clang-r547379/lib/clang/20/lib/linux/arm/libunwind-exported.a"] },
+        android_x86_64: { srcs: ["clang-r547379/lib/clang/20/lib/linux/x86_64/libunwind-exported.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++_static_noexcept",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "com.android.runtime"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    export_include_dirs: ["clang-r547379/include/c++/v1"],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/aarch64/lib/libc++_static_noexcept.a"] },
+        android_arm: { srcs: ["clang-r547379/android_libc++/platform_noexcept/arm/lib/libc++_static_noexcept.a"] },
+        android_x86_64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/x86_64/lib/libc++_static_noexcept.a"] },
+        android_x86: { srcs: ["clang-r547379/android_libc++/platform_noexcept/i386/lib/libc++_static_noexcept.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++demangle_noexcept",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "com.android.runtime"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/aarch64/lib/libc++demangle_noexcept.a"] },
+        android_arm: { srcs: ["clang-r547379/android_libc++/platform_noexcept/arm/lib/libc++demangle_noexcept.a"] },
+        android_x86_64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/x86_64/lib/libc++demangle_noexcept.a"] },
+        android_x86: { srcs: ["clang-r547379/android_libc++/platform_noexcept/i386/lib/libc++demangle_noexcept.a"] },
+    },
+}
+
+cc_prebuilt_library_static {
+    name: "libc++abi_noexcept",
+    device_supported: true,
+    recovery_available: true,
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    sdk_version: "minimum",
+    apex_available: ["//apex_available:platform", "com.android.runtime"],
+    stl: "none",
+    no_libcrt: true,
+    system_shared_libs: [],
+    target: {
+        android_arm64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/aarch64/lib/libc++abi_noexcept.a"] },
+        android_arm: { srcs: ["clang-r547379/android_libc++/platform_noexcept/arm/lib/libc++abi_noexcept.a"] },
+        android_x86_64: { srcs: ["clang-r547379/android_libc++/platform_noexcept/x86_64/lib/libc++abi_noexcept.a"] },
+        android_x86: { srcs: ["clang-r547379/android_libc++/platform_noexcept/i386/lib/libc++abi_noexcept.a"] },
+    },
+}
