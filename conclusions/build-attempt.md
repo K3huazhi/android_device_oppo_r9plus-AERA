@@ -2,18 +2,18 @@
 
 ## Result
 
-**No `recovery.img` was produced in this session.**
+**`recovery.img` was produced successfully after moving the WSL VHDX to C: NVMe and using 12 GB RAM + 64 GB NVMe swap + 8 GB zram.**
 
-The failure is in the **AOSP 16 build host**, not in the device tree or a proven hardware limitation. The device tree passes static validation. A 64 GB-RAM Linux host (or a prebuilt AOSP 16 tree with a complete `repo sync`) is required to finish the Soong analysis.
+Final image and hashes are in [`build-success.md`](build-success.md). This file keeps the earlier failure history because it explains why the build-host changes were necessary.
 
-## Environment
+## Environment (final successful build)
 
 - Windows 11 + WSL2 Ubuntu 24.04
-- 16 GB physical RAM → WSL limit 13.6 GB
-- 32 GB swap
-- 16 vCPU
+- 16 GB physical RAM → WSL limit 12 GB
+- 64 GB NVMe swap on C: (`swapFile=C:\\wsl\\swap.vhdx`), 8 GB zram
+- 12 vCPU
 - AOSP 16.0.0_r1 + AERA `aera-16.0`
-- Disk: ~66 GB used, ~890 GB free at time of attempt
+- WSL VHDX moved from A: HDD to C: NVMe
 
 ## What worked
 
