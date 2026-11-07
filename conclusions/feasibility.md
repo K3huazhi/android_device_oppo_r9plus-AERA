@@ -1,18 +1,22 @@
 # Feasibility — provisional assessment
 
-> 状态：**AOSP 16 源码已同步，静态验证通过；本机 16 GB RAM 未能完成 Soong 分析，因此没有 `recovery.img`，也没有设备启动。**
+> 状态：**AERA R1.0 `recovery.img` 已构建并通过静态校验；设备启动尚未执行。**
 
 ## 1. 结论
 
-**PARTIALLY FEASIBLE**
+**FEASIBLE（构建与静态校验层面）**
 
-设备树、内核、FDT、OPPO 证书、分区/fstab/显示/触摸/ADB 路径均已建立并通过静态校验。未完成的是**构建主机能力**，不是已证实的 R9 硬件障碍：
+设备树、内核、FDT、OPPO 证书、分区/fstab/显示/触摸/ADB 路径均已建立；AOSP 16 全量构建已完成，产出：
 
-- 16 GB 物理 RAM / 13.6 GB WSL 在全量 AOSP 16 Soong 分析阶段耗尽内存与 12–15 GB swap；
-- 裁剪 AOSP 模块会触发 `aconfig_declarations` 缺失/依赖环，不能作为受支持的构建方式；
-- 需要 ≥64 GB RAM 的 Linux 主机或完整 AERA CI 环境才能产出镜像。
+```text
+dist/recovery-AERA-R1.0-r9plus.img
+45,681,920 B
+sha256 3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45
+```
 
-因此本结论不是 **FEASIBLE**（没有镜像/设备证据），也不是 **BLOCKED**（没有证据表明 R9 硬件/内核不可用）。
+构建使用 12 GB WSL + 64 GB NVMe swap + 8 GB zram，Soong 峰值 swap 约 27 GiB，未 OOM。镜像 header v0 / page 2048、内核 SHA-256 与预编译 `Image.gz-dtb` 一致、ramdisk gzip 可解、尾部 1,280 B OPPO 证书存在，设备树静态检查 38/38 PASS。
+
+**未完成的是设备运行时验证**：没有刷入、没有启动、没有验证显示/触摸/ADB/分区/FDE。因此这不是“已验证可启动”的 FEASIBLE，而是“构建和静态证据完整”的 FEASIBLE。
 
 理由：
 
@@ -24,12 +28,14 @@
 6. 预编译内核和 OPPO 证书路径明确；
 7. 不需要修改 Android 7.1 的 boot/system。
 
-如果后续在 64 GB 主机上出现以下任一项，则可能降级为 **BLOCKED**：
+如果设备验证出现以下任一项，则可能降级为 **PARTIALLY FEASIBLE / BLOCKED**：
 
 - AERA 16 二进制在 4.9 内核上无法启动；
-- AERA ramdisk 压缩后超过约 53.4 MiB；
-- AERA 16 的 crypto 与 CM14.1 FDE 不兼容（只影响加密功能）；
-- OPPO aboot 拒绝未签名的自定义 image（证书路径失败）。
+- OPPO aboot 拒绝该自定义 image（证书/签名路径失败）；
+- 能启动但显示、触摸、ADB、分区挂载之一不可用；
+- AERA 16 的 crypto 与 CM14.1 FDE 不兼容（只影响加密功能）。
+
+容量问题已排除：最终 ramdisk 35,116,033 B，镜像 45,681,920 B，小于 64 MiB。
 
 ## 2. Q1–Q14
 
@@ -189,28 +195,24 @@ sepolicy/
 
 难度：**中高**。不是“改个设备名”的难度，但也不是“重写 recovery/kernel”的难度。关键路径是 Android 16 userspace 与 64 MiB 分区。
 
-## 3. 最终判定条件
+## 3. 最终判定
 
-升级为 **FEASIBLE**：
+当前：**FEASIBLE（构建/静态）**。
+
+已满足：
 
 - `recovery.img` 构建成功；
-- header/ramdisk/证书静态校验通过；
-- 设备启动到 AERA UI，显示/触摸/ADB/分区识别正常。
+- header v0 / page 2048；
+- kernel 与预编译 `Image.gz-dtb` SHA-256 一致；
+- ramdisk gzip 可解，含 `system/bin/recovery`、fstab、vintf、init rc；
+- 尾部 1,280 B OPPO 证书；
+- 总大小 45,681,920 B < 67,108,864 B；
+- 设备树静态检查 38/38 PASS。
 
-当前 **PARTIALLY FEASIBLE** 的具体原因：
+**没有满足**：设备启动到 AERA UI，显示/触摸/ADB/分区识别正常。因此不能称为“已验证可启动”。
 
-- 设备树/内核/证书/静态布局成立；
-- 但本机 16 GB RAM 未能完成 AOSP 16 Soong 分析，镜像未生成；
-- 尚无设备启动、显示、触摸、ADB 的运行时证据。
+设备验证后：
 
-若后续在 64 GB 主机上镜像可构建但出现以下情况，仍为 PARTIALLY FEASIBLE：
-
-- 能启动，但显示/触摸/ADB/分区之一不可用；
-- 或镜像可构建但超过 64 MiB，需裁剪；
-- 或加密不可用。
-
-**BLOCKED**：
-
-- 4.9 内核无法启动 AERA 16 userspace，且无法通过最小内核修改解决；
-- 或 OPPO aboot 拒绝自定义 recovery，且无临时启动/EDL 回退；
-- 或 AERA 16 的 ramdisk 无论怎么裁剪都超过 64 MiB。
+- 若启动且核心功能正常 → **FEASIBLE（已验证）**；
+- 若镜像可构建但显示/触摸/ADB/分区之一不可用，或 FDE 不可用 → **PARTIALLY FEASIBLE**；
+- 若 4.9 内核无法启动 AERA 16 userspace，且无法通过最小内核修改解决；或 OPPO aboot 拒绝该镜像且无回退 → **BLOCKED**。
