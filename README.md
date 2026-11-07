@@ -4,6 +4,8 @@
 > 研究快照：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.1-research>  
 > 构建产物：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.2-build>
 
+> **重要：该镜像已在实机刷入测试。重启到 recovery 后卡在第一屏，未进入 AERA UI；主机侧 `adb devices` / `fastboot devices` 均无设备。项目已放弃。除非你明确是在做故障研究，否则不要刷这个镜像。** 记录见 [`conclusions/runtime-result.md`](conclusions/runtime-result.md)。
+
 > 目标设备：OPPO R9 Plusm A / OPPO R9 Plustm A
 > 设备实际报告：`ro.product.device=R9PlusA`、`ro.product.name=R9PlustmA`、`ro.cm.device=r9plus`
 > SoC: Qualcomm MSM8976 (Snapdragon 652), Adreno 510
@@ -31,9 +33,9 @@ android_device_oppo_r9plus-AERA
 | AOSP 16 源码同步 | ✅ 已完成（BFSU 镜像 + 局部补齐 prebuilts） |
 | AERA recovery 编译 | ✅ 已完成（12 GB WSL + 64 GB NVMe swap + 8 GB zram） |
 | 生成 `recovery.img` | ✅ **45,681,920 B**，已追加 OPPO 1,280 B 证书 |
-| 设备启动验证 | ⛔ 未执行（按项目规则，需明确授权） |
+| 设备启动验证 | ❌ **刷入后卡第一屏；ADB/fastboot 均不可见** |
 
-**最终结论：FEASIBLE（构建与静态校验层面）。** AERA R1.0 `recovery.img` 已成功构建，header v0 / page 2048 / 内核 SHA-256 与预编译 `Image.gz-dtb` 一致 / ramdisk gzip 可解 / 尾部 1,280 B OPPO 证书均验证通过，设备树静态检查 38/38 PASS。**但还没有刷入设备**，AERA 16 用户空间在 4.9 内核上的实际启动、显示、触摸、ADB、分区挂载仍未验证；运行时仍可能失败。详见 [`conclusions/build-success.md`](conclusions/build-success.md)、[`conclusions/feasibility.md`](conclusions/feasibility.md)、[`conclusions/build-attempt.md`](conclusions/build-attempt.md)。
+**最终结论：PARTIALLY FEASIBLE（构建成功，运行时失败；项目已放弃）。** AERA R1.0 `recovery.img` 构建与静态校验通过，但实机刷入后重启 recovery 卡在第一屏，未进入 AERA UI，主机侧没有 ADB/fastboot 设备，未能取得启动日志。不能称为可启动镜像。详见 [`conclusions/runtime-result.md`](conclusions/runtime-result.md)、[`conclusions/build-success.md`](conclusions/build-success.md)、[`conclusions/feasibility.md`](conclusions/feasibility.md)。
 
 ---
 
@@ -127,9 +129,9 @@ sha256  3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45
 - `adb pull /sdcard/TWRP/.twrps`
 - `adb shell getevent -pl`
 
-**没有执行**：`flash`、`erase`、`format`、`fastboot flash`、`fastboot boot`、`adb reboot`、修改分区、修改 boot/recovery/system/userdata。
+**本项目自动化阶段没有执行**：`flash`、`erase`、`format`、`fastboot flash`、`fastboot boot`、`adb reboot`、修改分区、修改 boot/recovery/system/userdata。
 
-任何需要写入设备的步骤都在 `docs/bringup.md` 中标记为 **REQUIRES USER CONFIRMATION**。
+**但用户后续自行将构建出的 `recovery.img` 刷入 `recovery` 分区**，重启后卡第一屏；见 [`conclusions/runtime-result.md`](conclusions/runtime-result.md)。本项目不再继续任何设备操作，也不建议他人刷该镜像。
 
 ---
 
@@ -158,4 +160,4 @@ python3 tools/patch_oppo_image.py \
 - **PARTIALLY FEASIBLE**：设备树/基线大部分成立，但存在明确的构建、运行时或功能缺口。
 - **BLOCKED**：存在无法通过设备树/配置解决的硬障碍。
 
-当前结论：**FEASIBLE（构建/静态）**。`recovery.img` 已构建并通过静态校验；未进行设备启动，因此不能声称“已验证可启动”。下一步是获得明确授权后，按 [`docs/bringup.md`](docs/bringup.md) 做可回退的启动验证。运行时若失败，再按 [`conclusions/feasibility.md`](conclusions/feasibility.md) 的降级条件重新判定。
+当前结论：**PARTIALLY FEASIBLE（构建成功，运行时失败；项目已放弃）**。`recovery.img` 构建与静态校验通过，但实机刷入后卡第一屏、无 ADB/fastboot；不再继续 bring-up。保留仓库、构建记录和失败记录供后人参考；**该镜像不应作为可刷写镜像分发**。
