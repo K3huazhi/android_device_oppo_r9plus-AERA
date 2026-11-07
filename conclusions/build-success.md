@@ -40,7 +40,7 @@ image sha256     3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df4
 ramdisk 关键文件：
 
 ```text
-system/bin/recovery
+system/bin/recovery     ELF64 ARM64 PIE, ~10 MiB, contains "AERA Default"/aera.cfg strings
 system/etc/recovery.fstab
 vendor/etc/vintf/manifest/android.hardware.health@2.1.xml
 init.recovery.qcom.rc
