@@ -2,8 +2,9 @@
 
 本仓库是 **OPPO R9 Plusm A / R9PlustmA（`R9PlusA`，MSM8976）** 的 AERA Recovery 设备适配研究、设备树、构建记录与静态验证材料。
 
-> 当前结论：**FEASIBLE（构建与静态校验层面）**。  
-> `recovery.img` 已成功构建并通过静态校验，但**尚未刷入设备**，运行时未验证。
+> 当前结论：**PARTIALLY FEASIBLE（构建成功，运行时失败；项目已放弃）**。  
+> `recovery.img` 已构建并通过静态校验，但实机刷入后**卡在第一屏**，未进入 AERA UI；主机侧无 ADB/fastboot，未取得日志。  
+> **不要直接刷这个镜像**，除非你在做故障研究并有完整回退方案。记录：[conclusions/runtime-result.md](conclusions/runtime-result.md)。
 
 - 仓库：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA>
 - 研究快照：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.1-research>
@@ -48,7 +49,7 @@
 
 <https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/download/v0.2-build/recovery-AERA-R1.0-r9plus.img>
 
-**没有刷入设备。** 没有 `fastboot flash` / `fastboot boot` / `adb reboot` / 格式化 / 修改分区。
+**实机结果：** 镜像已刷入 `recovery` 分区；重启后卡第一屏，未进入 AERA UI；`adb devices` / `fastboot devices` 均无设备；未取得日志。项目已放弃，根因未定位。详见 [conclusions/runtime-result.md](conclusions/runtime-result.md)。
 
 ---
 
@@ -122,9 +123,10 @@ tools/build-patches/      构建系统修补
 
 ## 6. 安全边界
 
-- 没有 `fastboot flash`、`erase`、`format`、`reboot`；
+- 本项目自动化阶段没有执行 `fastboot flash`、`erase`、`format`、`reboot`；
 - 没有修改 boot/recovery/system/userdata/GPT；
-- 没有开启 root 或修改 persist。
+- 没有开启 root 或修改 persist；
+- 用户后续自行将构建出的 `recovery.img` 刷入 `recovery` 分区，结果见运行记录。
 
 刷机前必须备份、确认回退路径并获得明确授权。见 [`docs/bringup.md`](docs/bringup.md)。
 
