@@ -1,183 +1,161 @@
 # AERA Recovery for OPPO R9 Plusm A (`r9plus`)
 
-**AERA Recovery bring-up research + device tree for the OPPO R9 Plusm A / R9PlustmA (`R9PlusA`, MSM8976).**
+> GitHub 仓库：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA>  
+> 研究快照：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.1-research>  
+> 构建产物：<https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.2-build>
 
-- Repository: <https://github.com/K3huazhi/android_device_oppo_r9plus-AERA>
-- Research snapshot: <https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/tag/v0.1-research>
-- 中文说明: [`README.zh-CN.md`](README.zh-CN.md)
+> 目标设备：OPPO R9 Plusm A / OPPO R9 Plustm A
+> 设备实际报告：`ro.product.device=R9PlusA`、`ro.product.name=R9PlustmA`、`ro.cm.device=r9plus`
+> SoC: Qualcomm MSM8976 (Snapdragon 652), Adreno 510
+> 出厂 Android 5.1.1，当前 Android 7.1 / CyanogenMod 14.1
 
-> Current verdict: **PARTIALLY FEASIBLE** — the device identity, partition map, boot format, kernel/FDT, display/touch/USB paths, and OPPO certificate are verified and the device tree passes static validation. A complete AOSP 16 build was **not** finished on the 16 GB build host, so no bootable `recovery.img` is included. This is a build-host limitation, not a proven R9 hardware blocker.
+这是一个**独立的 AERA Recovery 设备适配项目**，不是把 AERA 主题套到 TWRP 上，也不是修改现有 Android 系统。最终交付物应是可维护的：
+
+```
+android_device_oppo_r9plus-AERA
+```
+
+本仓库当前包含研究证据、设备树、预编译内核基线、镜像构建脚本与 bring-up 计划。
 
 ---
 
-## 1. Target identity is locked
+## 当前状态
 
-This repository is **not** for the OPPO R9 (MT6755), R9 Plus in general, R9s, R9s Plus, or any other R9 variant.
-
-| Field | Verified value |
+| 阶段 | 状态 |
 |---|---|
-| Marketing name | OPPO R9 Plusm A |
-| Device-reported model | `OPPO R9 Plustm A` (vendor string) |
-| Product | `R9PlustmA` |
-| Device | `R9PlusA` |
-| CM codename | `r9plus` |
-| Fingerprint | `OPPO/R9PlusmA/R9PlusA:5.1.1/LMY47V/1390465867:user/release-keys` |
-| SoC | Qualcomm **MSM8976** (Snapdragon 652), Adreno 510 |
-| Current ROM | CyanogenMod 14.1, Android 7.1, API 25 |
-| Display | 1080×1920, 480 dpi |
-| Partition scheme | A-only, **independent 64 MiB recovery** |
+| 设备身份 / 型号锁定 | ✅ 已用只读 ADB 证据锁定 |
+| 分区表 / boot-recovery 布局 | ✅ 已确认（独立 recovery，A-only，64 MiB） |
+| 现有 TWRP / Lineage recovery 基线 | ✅ 已取得设备树、TWRP flags、Lineage 22.1 镜像 |
+| AERA 源码 / 构建系统研究 | ✅ 已拉取 `aera-16.0` |
+| AERA 设备树 | ✅ 已建立 `device/oppo/r9plus` |
+| AOSP 16 源码同步 | ✅ 已完成（BFSU 镜像 + 局部补齐 prebuilts） |
+| AERA recovery 编译 | ✅ 已完成（12 GB WSL + 64 GB NVMe swap + 8 GB zram） |
+| 生成 `recovery.img` | ✅ **45,681,920 B**，已追加 OPPO 1,280 B 证书 |
+| 设备启动验证 | ⛔ 未执行（按项目规则，需明确授权） |
 
-Evidence: [`docs/device-identity.md`](docs/device-identity.md), [`sources/live/getprop.txt`](sources/live/getprop.txt).
-
----
-
-## 2. What is verified
-
-| Item | Result | Evidence |
-|---|---|---|
-| Independent `recovery` partition | ✅ `mmcblk0p25`, 64 MiB | [`docs/partition-layout.md`](docs/partition-layout.md) |
-| A/B / dynamic partitions | ❌ none; A-only | same |
-| boot/recovery header | v0, page size 2048 | [`docs/boot-recovery-layout.md`](docs/boot-recovery-layout.md) |
-| Kernel format | `Image.gz` + appended FDT (242,901 B) | same |
-| OPPO certificate | 1,280 B DER at end of recovery.img | same |
-| Recovery kernel | Linux 4.9.337, reused from LineageOS 22.1 | [`docs/kernel.md`](docs/kernel.md) |
-| Display | fbdev `/dev/graphics/fb0`, RGBX_8888, stride 4352 | [`docs/display.md`](docs/display.md) |
-| Touch | `synaptics-s3508`, MT-B, 1080×1920 | [`docs/touch.md`](docs/touch.md) |
-| ADB/USB | configfs + FunctionFS, UDC `msm_hsusb` | [`docs/adb-usb.md`](docs/adb-usb.md) |
-| Storage | ext4 system/data/cache, f2fs data, SD/OTG | [`docs/storage.md`](docs/storage.md) |
-| Encryption | CM14.1 FDE footer, not FBE | [`docs/encryption.md`](docs/encryption.md) |
-| Device tree static check | **38/38 pass** | [`conclusions/static-validation.txt`](conclusions/static-validation.txt) |
-
-The kernel/FDT blob and OPPO certificate are included under [`device/oppo/r9plus/prebuilt/`](device/oppo/r9plus/prebuilt).
+**最终结论：FEASIBLE（构建与静态校验层面）。** AERA R1.0 `recovery.img` 已成功构建，header v0 / page 2048 / 内核 SHA-256 与预编译 `Image.gz-dtb` 一致 / ramdisk gzip 可解 / 尾部 1,280 B OPPO 证书均验证通过，设备树静态检查 38/38 PASS。**但还没有刷入设备**，AERA 16 用户空间在 4.9 内核上的实际启动、显示、触摸、ADB、分区挂载仍未验证；运行时仍可能失败。详见 [`conclusions/build-success.md`](conclusions/build-success.md)、[`conclusions/feasibility.md`](conclusions/feasibility.md)、[`conclusions/build-attempt.md`](conclusions/build-attempt.md)。
 
 ---
 
-## 3. Research approach
+## 关键结论（先读）
 
-This project deliberately works as an evidence chain, not as a copy of another device tree.
-
-### Step 1 — Lock the exact device
-
-Read-only ADB only: `getprop`, `/proc/cpuinfo`, `/proc/partitions`, `/dev/block/bootdevice/by-name`, `wm size`, `getevent -pl`, `sysfs` framebuffer and backlight. The running device reports `R9PlusA` / `R9PlustmA` / `r9plus`, with an MSM8976 and a 1080×1920 panel. The model string “OPPO R9 Plustm A” is a vendor spelling variant of the requested R9 Plusm A; the fingerprint disambiguates it.
-
-### Step 2 — Build the partition model from the live device
-
-The live `/proc/partitions` and `by-name` links were cross-checked against the CM14.1 device tree `partition.txt`. This established:
-
-- `boot = mmcblk0p24`, `recovery = mmcblk0p25`, both 64 MiB;
-- `system` 2 GiB ext4, `cache` 128 MiB, `userdata` ~55.2 GiB;
-- no `vendor`, `metadata`, `dtbo`, `super`, `vbmeta`;
-- `reserve2` is used as `/metadata` only by modern LineageOS, not by CM14.1.
-
-### Step 3 — Reverse the boot image instead of assuming a format
-
-The project obtained the public LineageOS 22.1 R9Plus `boot.img` / `recovery.img`, parsed the v0 headers, split the gzip member from the appended FDT, and checked the OPPO tail:
-
-- recovery kernel blob: 10,561,222 B;
-- gzip Image: 10,318,321 B;
-- FDT: 242,901 B (`d00dfeed`, totalsize matches);
-- trailing OPPO certificate: 1,280 B (`30 82 04 fc ...`).
-
-The included `tools/patch_oppo_image.py` reproduces the original Lineage recovery image byte-for-byte when given the extracted certificate.
-
-### Step 4 — Establish a working recovery baseline
-
-Two independent baselines were used:
-
-- TWRP 3.7.x R9Plus device tree (fstab, twrp.flags, brightness, pixel format, touch blacklist);
-- LineageOS 22.1 recovery (4.9 kernel, FDT, OPPO certificate, actual boot on the same hardware).
-
-This avoids guessing display/touch/partition details.
-
-### Step 5 — Map modern AERA onto a legacy device
-
-AERA `aera-16.0` is Android 16 + LVGL, with TWRP/OrangeFox ancestry. The port keeps AERA core untouched and puts every hardware difference in the device tree:
-
-- v0 boot image instead of GKI/vendor_boot;
-- independent recovery instead of A/B;
-- fbdev instead of DRM;
-- evdev MT-B touch;
-- configfs ADB with `msm_hsusb`;
-- FDE disabled for the first boot;
-- 4.9 prebuilt recovery kernel.
-
-### Step 6 — Build and statically validate, then bring up in stages
-
-`lunch twrp_r9plus-bp2a-eng` succeeds. Static checks validate the device tree, kernel/FDT, fstab/flags, and OPPO certificate. Device writes remain prohibited until explicit authorization and a backup/rollback path exist.
-
-See [`docs/bringup.md`](docs/bringup.md) for the staged plan.
+1. **这台机器确实有独立 `recovery` 分区**：`/dev/block/bootdevice/by-name/recovery -> mmcblk0p25`，64 MiB；`boot` 为 `mmcblk0p24`，同样 64 MiB。
+2. 设备是 **A-only**，没有 `vendor`、`metadata`、`dtbo`、`super` 等现代分区。
+3. 设备实际是 **MSM8976**，不是 MTK；`ro.board.platform=msm8952` 是 Qualcomm 平台族字段，不能据此误判为 Snapdragon 617。
+4. **CM14.1 的 3.10 内核不是必须复用的**。R9Plus 的 LineageOS 22.1（Android 15）已经使用 **4.9 recovery 内核**成功启动；本项目直接复用该 4.9 recovery 内核 + 其 FDT，避免为 Android 16 重写 3.10 内核。
+5. **OPPO 的 boot/recovery 镜像在标准 boot header 之后追加了一段 DER 证书**（不是 AVB footer）：boot.img 为 1,276 字节，recovery.img 为 1,280 字节。LineageOS 22.1 的 recovery.img 仍保留该段；AERA 镜像使用 recovery 的 1,280 字节版本。
+6. AERA 的 fbdev 后端可以直接使用本机 `/dev/graphics/fb0`（1080×1920，32bpp，stride 4352）。
+7. 触摸是 `synaptics-s3508`（MT-B，1080×1920），需要屏蔽 OPPO 的虚拟鼠标 `hbtp_vm`。
+8. **64 MiB 分区容量问题已经回答：** 最终 `recovery.img` 为 **45,681,920 B（43.56 MiB）**，装得下。尚未回答的是 **AERA 16 用户空间在 4.9 内核上的实际启动兼容性**，需要设备验证。
 
 ---
 
-## 4. Why no `recovery.img` in this repo
+## 目录
 
-The AOSP 16 Soong analysis exhausted the 13.6 GB WSL limit plus 12–15 GB swap on the build host and did not complete. Pruning non-recovery AOSP modules is not a supported workaround: it produces missing `aconfig_declarations` panics and a `Connectivity` ↔ `cronet` dependency cycle.
+```
+README.md
+docs/
+  device-identity.md
+  hardware.md
+  partition-layout.md
+  boot-recovery-layout.md
+  existing-recovery.md
+  kernel.md
+  display.md
+  touch.md
+  adb-usb.md
+  storage.md
+  encryption.md
+  aera-architecture.md
+  device-tree-design.md
+  build-guide.md
+  bringup.md
+device/oppo/r9plus/           # AERA device tree
+sources/
+  aera/                       # AERA source + manifests
+  device/                     # live evidence, CM14.1, Lineage 22.1 trees
+  recovery/                   # TWRP thortanium tree
+  kernel/                     # kernel notes / artifacts (metadata only)
+  other/                      # release metadata
+comparisons/
+  aera-vs-twrp.md
+  aera-device-trees.md
+  r9plusm-recovery-options.md
+conclusions/
+  feasibility.md
+  risks.md
+  next-steps.md
+  build-attempt.md
+  static-validation.txt
+dist/
+  android_device_oppo_r9plus-AERA.tar.gz
+tools/                        # boot image parser / patcher / build helpers
+```
 
-A full log is in [`conclusions/build-attempt.md`](conclusions/build-attempt.md).
+---
 
-To finish on a suitable host (≥64 GB RAM recommended):
+## 镜像产物
+
+**下载：** [recovery-AERA-R1.0-r9plus.img](https://github.com/K3huazhi/android_device_oppo_r9plus-AERA/releases/download/v0.2-build/recovery-AERA-R1.0-r9plus.img)
+
+```text
+size    45,681,920 B (43.56 MiB)
+sha256  3d9ddd212219f221a100c76942510b266c5a98e2d43bac9f68a0334e6f18df45
+```
+
+- header v0，page 2048；
+- kernel 10,561,222 B，与 `prebuilt/Image.gz-dtb` SHA-256 完全一致；
+- ramdisk 35,116,033 B gzip，3,650 个文件；
+- 尾部 1,280 B OPPO 证书（`30 82 04 fc`）；
+- 含 `system/bin/recovery`、`system/etc/recovery.fstab`、`vendor/etc/vintf`、`init.recovery.qcom.rc`。
+
+未签名的对照镜像：`dist/recovery-AERA-R1.0-r9plus-unsigned.img`。  
+**没有刷入设备。**
+
+---
+
+## 安全边界
+
+本项目第一阶段**只做只读分析、源码编译和镜像静态验证**。
+
+已执行且只执行过的设备操作：
+
+- `adb devices`
+- `adb shell getprop`
+- `adb shell cat /proc/...`
+- `adb shell ls /sys/...`、`/dev/block/...`
+- `adb pull /sdcard/TWRP/.twrps`
+- `adb shell getevent -pl`
+
+**没有执行**：`flash`、`erase`、`format`、`fastboot flash`、`fastboot boot`、`adb reboot`、修改分区、修改 boot/recovery/system/userdata。
+
+任何需要写入设备的步骤都在 `docs/bringup.md` 中标记为 **REQUIRES USER CONFIRMATION**。
+
+---
+
+## 复现入口
+
+见 [`docs/build-guide.md`](docs/build-guide.md)。核心命令（在 Linux/AOSP 环境中）：
 
 ```bash
 source build/envsetup.sh
 lunch twrp_r9plus-bp2a-eng
-mka -j16 adbd recoveryimage
-
+mka adbd recoveryimage
 python3 tools/patch_oppo_image.py \
   out/target/product/r9plus/recovery.img \
   device/oppo/r9plus/prebuilt/oppo_boot.patch
-
-python3 tools/static_check.py
-python3 tools/parse_bootimg.py out/target/product/r9plus/recovery.img
 ```
 
-Expected output: `recovery.img`, header v0, kernel ≈10.56 MiB, page 2048, gzip ramdisk, 1,280 B certificate, ≤64 MiB.
+输出目标：`out/target/product/r9plus/recovery.img`。
 
 ---
 
-## 5. Repository layout
+## 结论口径
 
-```text
-device/oppo/r9plus/       AERA device tree + prebuilt kernel + OPPO certificate
-docs/                     evidence and design documents
-comparisons/              AERA vs TWRP, device trees, recovery options
-conclusions/              feasibility, risks, build log, static validation
-sources/live/             read-only ADB/sysfs evidence from the device
-sources/aera/             AERA manifest snapshots
-sources/device/           CM14.1 / LineageOS 22.1 device tree snapshots
-sources/recovery/         TWRP R9Plus baseline tree
-sources/kernel/           4.9.337 recovery defconfig + version
-sources/other/            public release metadata and hashes
-tools/                    image parser, OPPO patcher, static checker, WSL helpers
-```
+最终只会给出以下三者之一：
 
----
+- **FEASIBLE**：已编译出镜像，且静态校验/可恢复测试路径完整；若设备验证成功则更充分。
+- **PARTIALLY FEASIBLE**：设备树/基线大部分成立，但存在明确的构建、运行时或功能缺口。
+- **BLOCKED**：存在无法通过设备树/配置解决的硬障碍。
 
-## 6. Key source references
-
-- AERA Recovery: <https://github.com/AERA-Recovery/android_bootable_recovery> (branch `aera-16.0`)
-- AERA project site: <https://aera-recovery.com/>
-- LineageOS 22.1 R9Plus release: <https://github.com/BlueyfishReleases/R9Plus>
-- TWRP R9Plus baseline: <https://codeberg.org/TipzTeam/recovery_device_oppo_thortanium>
-- CM14.1 R9Plus tree: <https://github.com/wuxianlin/android_device_oppo_r9plus>
-- LineageOS 21/22.1 R9Plus tree: <https://github.com/blueyfish/android_device_oppo_R9Plus>
-- Kernel source: <https://github.com/blueyfish/android_kernel_oppo_msm8937> (branch `lineage-22.1`)
-
-Third-party attribution is in [`NOTICE`](NOTICE).
-
----
-
-## 7. Safety
-
-No device write was performed during this research:
-
-- no `fastboot flash`, `erase`, `format`, `reboot`;
-- no modification of boot/recovery/system/userdata/GPT;
-- no root enabling or `persist` changes.
-
-The device tree is ready for the next phase, but **flashing requires a verified backup, a rollback path, and explicit user authorization**. See [`docs/bringup.md`](docs/bringup.md).
-
----
-
-## 8. License
-
-GPL-3.0-or-later. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+当前结论：**FEASIBLE（构建/静态）**。`recovery.img` 已构建并通过静态校验；未进行设备启动，因此不能声称“已验证可启动”。下一步是获得明确授权后，按 [`docs/bringup.md`](docs/bringup.md) 做可回退的启动验证。运行时若失败，再按 [`conclusions/feasibility.md`](conclusions/feasibility.md) 的降级条件重新判定。
